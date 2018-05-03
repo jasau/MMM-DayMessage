@@ -4,8 +4,16 @@ Module.register("MMM-DayMessage",{
 
     // Default module config.
     defaults: {
-        day: '03/05/',
-        text: "Happy Birthday!",
+        events: [
+            {
+                day: "03/06/2018", // "DD/MM" for annual or "DD/MM/YYYY" for specific day
+                text: "Happy Birthday!",
+            },
+            {
+                day: "03/06", // "DD/MM" for annual or "DD/MM/YYYY" for specific day
+                text: "yeeeeaah!",
+            }
+        ],
         updateInterval: 30000
     },
 
@@ -23,21 +31,30 @@ Module.register("MMM-DayMessage",{
 
     compare: function() {
         var display = "";
-        var today = "";
-        var dlength = this.config.day.length;
+        var today = moment().format("DD/MM/YYYY");
+        var eday;
+        var etext;
 
-        if  (dlength == 10) {
-            today = moment().format("DD/MM/YYYY");
-        } else if (dlength == 5) {
-            today = moment().format("DD/MM");
-        } else  {
-            Log.error(this.name + 'Wrong day format - use DD/MM for annual or DD/MM/YYYY for specific day');
-            display = "wrong day";
+        for (let i = 0; i < this.config.events.length; i += 1) {
+            eday = this.config.events[i].day;
+            etext = this.config.events[i].text;
+
+            if (eday.length == 5 && eday.charAt(2) == "/") {
+                today = today.substr(0,5);
+            } else if (eday.length == 10 && eday.charAt(2) == "/" && eday.charAt(5) == "/") {
+                today = eday;
+            } else {
+                Log.error(this.name + ' - Wrong day format - use DD/MM for annual or DD/MM/YYYY for specific day');
+                display = "wrong day";
+            }
+
+            if (today == eday) {
+                display += etext;
+                // language=HTML
+                display += "</br>";
+            }
         }
 
-        if (today == this.config.day) {
-            display = this.config.text;
-        }
 
         return display;
     },
